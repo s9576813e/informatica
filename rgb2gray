@@ -1,0 +1,9 @@
+int rgb2gray(ImageP3* input, ImageP2* output){
+    for(int r=0; r<input->size.rows; r++){
+        for(int c=0; c<input->size.cols; c++){
+            output->data.pixels[r][c] = (input->data.red[r][c] + input->data.green[r][c] + input->data.blue[r][c])/3;
+        
+        }
+    }
+  return 0;
+}
