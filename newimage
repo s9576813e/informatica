@@ -1,0 +1,440 @@
+// includo le librerie necessarie
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+/**
+ * @brief Struttura per la gestione delle dimensioni dell'immagine
+ *
+ */
+struct Size
+{
+    unsigned long int rows;
+    unsigned long int cols;
+};
+
+/**
+ * @brief Struttura dati per i pixel dell'immagine P1 (Bitmap/Segmentazione)
+ *
+ */
+struct DataP1
+{
+    short int **pixels;
+};
+
+/**
+ * @brief Struttura dati per i pixel dell'immagine P2 (Grayscale)
+ *
+ */
+struct DataP2
+{
+    unsigned int **pixels;
+};
+
+/**
+ * @brief Struttura dati per i pixel dell'immagine P3 (RGB)
+ *
+ */
+struct DataP3
+{
+    unsigned int **red;
+    unsigned int **green;
+    unsigned int **blue;
+};
+
+/**
+ * @brief // struttura dell'immagine P1
+ *
+ */
+struct ImageP1
+{
+    string format;
+    string comment;
+    Size size;
+    DataP1 data;
+};
+
+/**
+ * @brief struttura dell'immagine P2
+ */
+struct ImageP2
+{
+    string format;
+    string comment;
+    Size size;
+    unsigned long maxValue;
+    DataP2 data;
+};
+
+/**
+    @brief struttura dell'immagine P3
+*/
+struct ImageP3
+{
+    string format;
+    string comment;
+    Size size;
+    unsigned long maxValue;
+    DataP3 data;
+};
+
+ImageP1 *readImageP1(string filename)
+{
+    ImageP1 *image;
+    ifstream inFile(filename);
+    string line;
+
+    // controllo dell'apertura del file
+    if (!inFile.is_open())
+    {
+        cerr << "Impossibile aprire il file" << endl;
+        return nullptr;
+    }
+
+    // controllo del formato
+    if (inFile.peek() != 'P')
+    {
+        cerr << "formato non valido" << endl;
+        inFile.close();
+        return nullptr;
+    }
+    image = new ImageP1;
+    inFile >> image->format;
+
+    // controllo la correttezza del formato
+    if (image->format != "P1")
+    {
+        cerr << "Formato non supportato" << endl;
+        inFile.close();
+        delete image;
+        return nullptr;
+    }
+
+    // ignoro gli spazi e la fine delle righe
+    while (inFile.peek() == ' ' || inFile.peek() == '\n')
+    {
+        inFile.ignore();
+    }
+
+    if (inFile.peek() == '#')
+    {
+        getline(inFile, image->comment);
+    }
+
+    // salvo in size le righe e le colonne che ho letto
+    inFile >> image->size.rows >> image->size.cols;
+
+    // alloco memoria per le righe
+    image->data.pixels = new short int *[image->size.rows];
+
+    char reader;
+
+    for (int r = 0; r < image->size.rows; r++)
+    { // alloco memoria per le colonne
+        image->data.pixels[r] = new short int[image->size.cols];
+        for (int c = 0; c < image->size.cols; c++)
+        {
+            // leggo i pixels
+            inFile >> reader;
+            image->data.pixels[r][c] = int(reader) - int('0');
+        }
+    }
+
+    inFile.close();
+
+    // restituisco un puntatore all'immagine con tutti i dati che ho letto
+    return image;
+}
+
+ImageP2 *readImageP2(string filename)
+{
+    ImageP2 *image;
+    ifstream inFile(filename);
+    string line;
+
+    // controllo l'apertra del file
+    if (!inFile.is_open())
+    {
+        cerr << "impossibile aprire il file!!" << endl;
+        return nullptr;
+    }
+
+    // lettura del formato
+    if (inFile.peek() != 'P')
+    {
+        cerr << "formato non valido!!" << endl;
+        inFile.close();
+        return nullptr;
+    }
+    // controllo la corrrettezza del formato
+    image = new ImageP2;
+    inFile >> image->format;
+    if (image->format != "P2")
+    {
+        cerr << "Formato non supportato" << endl;
+        inFile.close();
+        delete image;
+        return nullptr;
+    }
+
+    // ignoro gli spazi e la fine delle righe
+    while (inFile.peek() == ' ' || inFile.peek() == '\n')
+    {
+        inFile.ignore();
+    }
+
+    // leggo il commento se c'è
+    if (inFile.peek() == '#')
+    {
+        getline(inFile, image->comment);
+    }
+
+    // leggo righe e colonne e valore massimo
+    inFile >> image->size.rows >> image->size.cols;
+    inFile >> image->maxValue;
+
+
+    // alloco la memoria per le righe
+    image->data.pixels = new unsigned int *[image->size.rows];
+    for (int r = 0; r < image->size.rows; r++)
+    {
+        // alloco la memoria per le colonne
+        image->data.pixels[r] = new unsigned int[image->size.cols];
+        for (int c = 0; c < image->size.cols; c++)
+        {
+            // leggo i pixels
+            inFile >> image->data.pixels[r][c];
+        }
+    }
+
+    // ritorno un puntatore all'immagine
+    inFile.close();
+    return image;
+}
+
+ImageP3 *readImageP3(string filename)
+{
+    ImageP3 *image;
+    ifstream inFile(filename);
+    string line;
+
+    // controllo l'apertra del file
+    if (!inFile.is_open())
+    {
+        cerr << "impossibile aprire il file!!" << endl;
+        return nullptr;
+    }
+
+    // lettura del formato
+    if (inFile.peek() != 'P')
+    {
+        cerr << "formato non valido!!" << endl;
+        inFile.close();
+        return nullptr;
+    }
+
+    // controllo la validità del formato
+    image = new ImageP3;
+    inFile >> image->format;
+    if (image->format != "P3")
+    {
+        cerr << "Formato non supportato" << endl;
+        inFile.close();
+        delete image;
+        return nullptr;
+    }
+
+    // ignoror spazi e fine delle righe
+    while (inFile.peek() == ' ' || inFile.peek() == '\n')
+    {
+        inFile.ignore();
+    }
+
+    if (inFile.peek() == '#')
+    {
+        getline(inFile, image->comment);
+    }
+
+    inFile >> image->size.rows >> image->size.cols;
+    inFile >> image->maxValue;
+
+    // alloco memoria per i pixel rossi, verdi e blue
+    image->data.red = new unsigned int *[image->size.rows];
+    image->data.green = new unsigned int *[image->size.rows];
+    image->data.blue = new unsigned int *[image->size.rows];
+
+    for (int r = 0; r < image->size.rows; r++)
+    {
+        image->data.red[r] = new unsigned int[image->size.cols];
+        image->data.green[r] = new unsigned int[image->size.cols];
+        image->data.blue[r] = new unsigned int[image->size.cols];
+        for (int c = 0; c < image->size.cols; c++)
+        {
+            // leggo i pixels
+            inFile >> image->data.red[r][c] >> image->data.green[r][c] >> image->data.blue[r][c];
+        }
+    }
+    // ritorno un puntore all'immagine
+    inFile.close();
+    return image;
+}
+
+void printImageP1(ImageP1 *image)
+{
+    // controllo esistenza immagine
+    if (image == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+    // stampo formato, eventuale commento, le dimensioni e pixel per pixel
+    cout << "Formato: " << image->format << endl;
+    cout << "Commento: " << image->comment << endl;
+    cout << "Dimensioni: " << image->size.rows << "x" << image->size.cols << endl;
+    cout << "Pixel:" << endl;
+
+    for (int r = 0; r < image->size.rows; r++)
+    {
+        for (int c = 0; c < image->size.cols; c++)
+        {
+            cout << image->data.pixels[r][c] << "\t";
+        }
+        cout << endl;
+    }
+}
+
+void printImageP2(ImageP2 *imageP2)
+{
+    // controllo esistenza immagine
+    if (imageP2 == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+
+    // stampo formato, eventuale commento, le dimensioni e pixel per pixel
+    cout << "Formato: " << imageP2->format << endl;
+    cout << "Commento: " << imageP2->comment << endl;
+    cout << "Dimensioni: " << imageP2->size.rows << "x" << imageP2->size.cols << endl;
+    cout << "Pixel:" << endl;
+    for (int r = 0; r < imageP2->size.rows; r++)
+    {
+        for (int c = 0; c < imageP2->size.cols; c++)
+        {
+            cout << imageP2->data.pixels[r][c] << "\t";
+        }
+        cout << endl;
+    }
+}
+
+void printImageP3(ImageP3 *imageP3)
+{
+    // controllo esistenza immagine
+    if (imageP3 == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+
+    // stampo formato, eventuale commento, le dimensioni e pixel per pixel
+    cout << "Formato: " << imageP3->format << endl;
+    cout << "Commento: " << imageP3->comment << endl;
+    cout << "Dimensioni: " << imageP3->size.rows << "x" << imageP3->size.cols << endl;
+    cout << "Pixel:" << endl;
+    DataP3 data = imageP3->data;
+    for (long long int r = 0; r < imageP3->size.rows; r++)
+    {
+        for (long long int c = 0; c < imageP3->size.cols; c++)
+        {
+            cout << imageP3->data.red[r][c] << " " << imageP3->data.green[r][c] << " " << imageP3->data.blue[r][c] << "\t";
+        }
+        cout << endl;
+    }
+}
+
+void freeImageP1(ImageP1 *imageP1)
+{
+    if (imageP1 == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+    for (int r = 0; r < imageP1->size.rows; r++)
+    {
+        delete[] imageP1->data.pixels[r];
+    }
+    delete[] imageP1->data.pixels;
+    delete imageP1;
+    imageP1 = nullptr;
+    if (imageP1 == nullptr)
+    {
+        cout << "memoria liberata" << endl;
+    }
+}
+
+void freeImageP2(ImageP2 *imageP2)
+{
+    if (imageP2 == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+    for (int r = 0; r < imageP2->size.rows; r++)
+    {
+        delete[] imageP2->data.pixels[r];
+    }
+    delete[] imageP2->data.pixels;
+    delete imageP2;
+    imageP2 = nullptr;
+}
+
+/// @brief funzione che dealloca la memoria occupata da imageP3
+/// @param imageP3
+void freeImageP3(ImageP3 *imageP3)
+{
+    if (imageP3 == nullptr)
+    {
+        cerr << "Immagine non valida" << endl;
+        return;
+    }
+    for (int r = 0; r < imageP3->size.rows; r++)
+    {
+        delete[] imageP3->data.red[r];
+        delete[] imageP3->data.green[r];
+        delete[] imageP3->data.blue[r];
+    }
+    delete[] imageP3->data.red;
+    delete[] imageP3->data.green;
+    delete[] imageP3->data.blue;
+    delete imageP3;
+    imageP3 = nullptr;
+}
+
+ImageP1* newImageP1(const unsigned int rows, const unsigned int cols)
+{
+    ImageP1* img = new ImageP1;
+    string nome;
+    cout << "nome di image: ";cin >> nome;
+    img->format = nome;
+    img->size.cols = cols;
+    img->size.rows = rows;
+    img->data.pixels = new short int *[img->size.rows];
+
+    for(int j = 0;j < rows;j++)
+    {
+       img->data.pixels[j] = 0;
+    }
+    
+    return img;
+}
+
+int writeImageP1(string filename)
+{
+
+}
+
+int main(){
+    newImageP1(4,4);
+    return EXIT_SUCCESS;
+}
