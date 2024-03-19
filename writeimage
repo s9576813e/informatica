@@ -1,0 +1,12 @@
+int writeimageP1(ImageP1 *image, string filename){
+    ofstream outFile(filename);
+   
+    
+    for (int r = 0; r < image->size.rows; r++){
+        for (int c = 0; c < image->size.cols; c++){
+          cout<< image->data.pixels[r][c] << "\t";
+          
+        }
+    }
+        return 0;
+}
