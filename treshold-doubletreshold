@@ -1,0 +1,30 @@
+ImageP2* tresholdFilterP2(ImageP2* image, unsigned int treshold){
+    for(int r=0; r<image->size.rows; r++){
+        for(int c=0; c<image->size.cols; c++){
+            if<image->data.pixels[r][c] > treshold){
+              <image->data.pixels[r][c] = 1;
+             
+              }
+               else {
+              <image->data.pixels[r][c] = 0;
+            }
+        }
+    }
+  return image;
+}
+ImageP2 *doubleTresholder(ImageP2* image, unsigned int treshold1, unsigned int treshold2){
+    for(int r=0; r<image->size.rows; r++){
+        for(int c=0; c<image->size.cols; c++){
+            if(image->data.pixels[r][c] > treshold1 && image->data.pixels[r][c] < treshold2 ){
+                image->data.pixels[r][c] = 1;
+          
+            }
+             else {
+                image->data.pixels[r][c] = 0;
+            }
+          
+        }
+      
+    }
+  return image;
+}
