@@ -1,0 +1,24 @@
+ImageP2* inversionFilterP2(ImageP2* input)
+{
+    ImageP2* invertedImage = new ImageP2;
+
+    invertedImage->format = input->format;
+    invertedImage->comment = "Inverted Image";
+
+    invertedImage->size.rows = input->size.rows;
+    invertedImage->size.cols = input->size.cols;
+    invertedImage->maxValue = input->maxValue;
+
+    invertedImage->data.pixels = new unsigned int*[invertedImage->size.rows];
+
+    for (int r = 0; r < invertedImage->size.rows; r++)
+    {
+        invertedImage->data.pixels[r] = new unsigned int[invertedImage->size.cols];
+        for (int c = 0; c < invertedImage->size.cols; c++)
+        {
+            invertedImage->data.pixels[r][c] = 255 - input->data.pixels[r][c];
+        }
+    }
+
+    return invertedImage;
+}
